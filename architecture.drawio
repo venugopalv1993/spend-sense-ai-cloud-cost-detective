@@ -1,0 +1,111 @@
+<mxfile host="app.diagrams.net" modified="2026-06-10T00:00:00.000Z" agent="Copilot" version="21.0.0">
+  <diagram name="Architecture" id="arch-1">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- USER -->
+        <mxCell id="2" value="👤 USER" style="shape=ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="680" y="30" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- REACT FRONTEND -->
+        <mxCell id="3" value="⚛️ React Frontend&lt;br&gt;&lt;i&gt;Vite + TypeScript&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="640" y="140" width="220" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: User -> Frontend -->
+        <mxCell id="4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#6c8ebf;strokeWidth=2;" edge="1" parent="1" source="2" target="3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- FASTAPI BACKEND -->
+        <mxCell id="5" value="🐍 Python Backend&lt;br&gt;&lt;b&gt;FastAPI&lt;/b&gt;&lt;br&gt;JWT Auth" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="640" y="270" width="220" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: Frontend -> Backend -->
+        <mxCell id="6" value="Login / Signup / Scan" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#82b366;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="3" target="5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- BOTO3 / AWS SDK -->
+        <mxCell id="7" value="☁️ Boto3&lt;br&gt;&lt;i&gt;AWS SDK&lt;/i&gt;&lt;br&gt;&lt;br&gt;EC2, RDS, S3&lt;br&gt;Lambda, ELB, EBS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="320" y="430" width="180" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- WEBSOCKET -->
+        <mxCell id="8" value="🔌 WebSocket&lt;br&gt;&lt;i&gt;Real-time Progress&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="610" y="430" width="180" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- AI / OPENAI -->
+        <mxCell id="9" value="🤖 AI Engine&lt;br&gt;&lt;i&gt;OpenAI / Groq / Azure&lt;/i&gt;&lt;br&gt;&lt;br&gt;Cost Analysis &amp; Recommendations" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="900" y="430" width="220" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: Backend -> Boto3 -->
+        <mxCell id="10" value="Scan Resources" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#b85450;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="5" target="7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: Backend -> WebSocket -->
+        <mxCell id="11" value="Progress Updates" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#9673a6;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="5" target="8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: Backend -> AI -->
+        <mxCell id="12" value="Analyze" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#666666;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="5" target="9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- AWS Cloud -->
+        <mxCell id="13" value="☁️ AWS Account&lt;br&gt;&lt;i&gt;(Multi-Region)&lt;/i&gt;" style="shape=cloud;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="290" y="590" width="200" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: Boto3 -> AWS -->
+        <mxCell id="14" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#b85450;strokeWidth=2;" edge="1" parent="1" source="7" target="13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- POSTGRESQL -->
+        <mxCell id="15" value="🗄️ PostgreSQL&lt;br&gt;&lt;br&gt;• users&lt;br&gt;• analyses" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="940" y="600" width="150" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: AI -> PostgreSQL -->
+        <mxCell id="16" value="Store Results" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#6c8ebf;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="9" target="15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- REACT PROGRESS TRACKER -->
+        <mxCell id="17" value="📊 Progress Tracker&lt;br&gt;&lt;i&gt;(Live UI Updates)&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="590" y="560" width="170" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: WebSocket -> Progress Tracker -->
+        <mxCell id="18" value="Live" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#9673a6;strokeWidth=2;dashed=1;fontSize=10;" edge="1" parent="1" source="8" target="17">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- FINAL REPORT -->
+        <mxCell id="19" value="📋 Final Report&lt;br&gt;&lt;b&gt;Suggestions + Fixes&lt;/b&gt;&lt;br&gt;&lt;i&gt;Estimated Savings&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="610" y="690" width="210" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: PostgreSQL -> Report -->
+        <mxCell id="20" value="Fetch" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#6c8ebf;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="15" target="19">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: Progress -> Report -->
+        <mxCell id="21" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#82b366;strokeWidth=1;dashed=1;" edge="1" parent="1" source="17" target="19">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

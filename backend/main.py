@@ -5,19 +5,20 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import Optional
 
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
 
-from aws_scanner import get_regions, scan_resources
-from ai_analyzer import analyze_costs
+from aws_scanner import get_regions, scan_resources, get_cost_and_usage, get_cost_forecast, get_budgets, get_trusted_advisor_checks
+from ai_analyzer import analyze_costs, chat_with_ai, simulate_optimization
 from db import init_db, save_analysis, get_history, get_analysis_by_id
 from auth import signup_user, login_user, get_current_user
 
-app = FastAPI(title="AI Cloud Cost Detective (AWS)")
+app = FastAPI(title="CloudPulse AI")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5173", "http://localhost:5174", "http://localhost:5175"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -26,6 +27,10 @@ app.add_middleware(
 # Store active WebSocket connections by analysis_id
 progress_connections: dict[str, WebSocket] = {}
 
+@app.get("/")
+def root():
+    """Health check endpoint."""
+    return {"status": "ok", "service": "CloudPulse AI"}
 
 @app.on_event("startup")
 def startup():
@@ -45,6 +50,16 @@ class AnalyzeRequest(BaseModel):
 class AuthRequest(BaseModel):
     email: str
     password: str
+
+
+class ChatRequest(BaseModel):
+    message: str
+    role: Optional[str] = "devops"
+
+
+class SimulateRequest(BaseModel):
+    resources: list
+    actions: list
 
 
 # --- Auth endpoints (public) ---
@@ -161,6 +176,73 @@ def history_detail(analysis_id: str, user: dict = Depends(get_current_user)):
     return result
 
 
+@app.get("/api/cost-overview")
+def cost_overview(user: dict = Depends(get_current_user)):
+    """Get cost overview from AWS Cost Explorer."""
+    try:
+        cost_data = get_cost_and_usage(days=30)
+        forecast = get_cost_forecast()
+        budgets = get_budgets()
+        return {
+            "cost_data": cost_data,
+            "forecast": forecast,
+            "budgets": budgets,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/trusted-advisor")
+def trusted_advisor(user: dict = Depends(get_current_user)):
+    """Get Trusted Advisor cost optimization checks."""
+    try:
+        checks = get_trusted_advisor_checks()
+        return {"checks": checks}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/chat")
+def ai_chat(request: ChatRequest, user: dict = Depends(get_current_user)):
+    """AI Chat endpoint - conversational cloud cost assistant."""
+    try:
+        # Build context from latest analysis
+        context = {
+            "user_role": request.role,
+            "user_email": user.get("email", ""),
+        }
+        # Try to get recent cost data
+        try:
+            context["cost_data"] = get_cost_and_usage(days=30)
+        except Exception:
+            context["cost_data"] = {}
+
+        # Try to get latest analysis from DB
+        try:
+            history = get_history(user["user_id"])
+            if history:
+                latest = get_analysis_by_id(history[0]["id"], user["user_id"])
+                if latest and latest.get("analysis_result"):
+                    context["latest_analysis"] = latest["analysis_result"]
+        except Exception:
+            pass
+
+        response = chat_with_ai(request.message, context)
+        return {"response": response}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/simulate")
+def simulate(request: SimulateRequest, user: dict = Depends(get_current_user)):
+    """Simulate the impact of optimization actions before applying them."""
+    try:
+        result = simulate_optimization(request.resources, request.actions)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.websocket("/ws/progress/{analysis_id}")
 async def websocket_progress(websocket: WebSocket, analysis_id: str):
     """WebSocket endpoint for live progress updates."""
@@ -187,3 +269,7 @@ async def _send_progress(analysis_id: str, message: str, percent: int = 0):
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", port=8000, reload=True)

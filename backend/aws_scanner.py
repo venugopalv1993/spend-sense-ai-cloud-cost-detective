@@ -33,6 +33,144 @@ def scan_resources(region: str):
     return all_resources
 
 
+def get_cost_and_usage(days: int = 30) -> dict:
+    """Get cost and usage data from AWS Cost Explorer."""
+    try:
+        ce = boto3.client("ce")
+        end = datetime.now(timezone.utc).date()
+        start = end - timedelta(days=days)
+
+        response = ce.get_cost_and_usage(
+            TimePeriod={"Start": start.isoformat(), "End": end.isoformat()},
+            Granularity="DAILY",
+            Metrics=["UnblendedCost", "UsageQuantity"],
+            GroupBy=[{"Type": "DIMENSION", "Key": "SERVICE"}],
+        )
+
+        services = {}
+        total_cost = 0.0
+        for result in response.get("ResultsByTime", []):
+            for group in result.get("Groups", []):
+                service = group["Keys"][0]
+                amount = float(group["Metrics"]["UnblendedCost"]["Amount"])
+                services[service] = services.get(service, 0) + amount
+                total_cost += amount
+
+        return {
+            "total_cost": round(total_cost, 2),
+            "period_days": days,
+            "services": {k: round(v, 2) for k, v in sorted(services.items(), key=lambda x: -x[1])},
+            "daily_average": round(total_cost / max(days, 1), 2),
+        }
+    except (ClientError, NoCredentialsError) as e:
+        print(f"[CostExplorer] get_cost_and_usage failed: {e}")
+        return {"error": str(e), "total_cost": 0, "services": {}}
+
+
+def get_cost_forecast() -> dict:
+    """Get cost forecast for the next 30 days using Cost Explorer."""
+    try:
+        ce = boto3.client("ce")
+        start = datetime.now(timezone.utc).date() + timedelta(days=1)
+        end = start + timedelta(days=30)
+
+        response = ce.get_cost_forecast(
+            TimePeriod={"Start": start.isoformat(), "End": end.isoformat()},
+            Metric="UNBLENDED_COST",
+            Granularity="MONTHLY",
+        )
+
+        return {
+            "forecast_total": round(float(response["Total"]["Amount"]), 2),
+            "forecast_unit": response["Total"]["Unit"],
+        }
+    except (ClientError, NoCredentialsError) as e:
+        return {"error": str(e), "forecast_total": 0}
+
+
+def get_budgets() -> list:
+    """Get AWS Budgets information."""
+    try:
+        account_id = boto3.client("sts").get_caller_identity()["Account"]
+        budgets_client = boto3.client("budgets")
+        response = budgets_client.describe_budgets(AccountId=account_id)
+
+        results = []
+        for budget in response.get("Budgets", []):
+            limit = float(budget["BudgetLimit"]["Amount"])
+            actual = float(budget.get("CalculatedSpend", {}).get("ActualSpend", {}).get("Amount", 0))
+            forecast = float(budget.get("CalculatedSpend", {}).get("ForecastedSpend", {}).get("Amount", 0))
+            results.append({
+                "name": budget["BudgetName"],
+                "limit": limit,
+                "actual_spend": actual,
+                "forecasted_spend": forecast,
+                "utilization_percent": round((actual / limit) * 100, 1) if limit > 0 else 0,
+                "overrun_risk": forecast > limit,
+            })
+        return results
+    except (ClientError, NoCredentialsError):
+        return []
+
+
+def get_trusted_advisor_checks() -> list:
+    """Get AWS Trusted Advisor cost optimization checks."""
+    try:
+        support = boto3.client("support", region_name="us-east-1")
+        response = support.describe_trusted_advisor_checks(language="en")
+
+        cost_checks = [c for c in response["checks"] if c["category"] == "cost_optimizing"]
+        results = []
+        for check in cost_checks[:10]:
+            try:
+                result = support.describe_trusted_advisor_check_result(checkId=check["id"])
+                results.append({
+                    "name": check["name"],
+                    "description": check["description"],
+                    "status": result["result"]["status"],
+                    "flagged_resources": len(result["result"].get("flaggedResources", [])),
+                })
+            except ClientError:
+                continue
+        return results
+    except (ClientError, NoCredentialsError):
+        return []
+
+
+def get_network_traffic(region: str, instance_id: str) -> dict:
+    """Get network in/out metrics for an EC2 instance."""
+    try:
+        cw = boto3.client("cloudwatch", region_name=region)
+        end = datetime.now(timezone.utc)
+        start = end - timedelta(days=7)
+
+        net_in = cw.get_metric_statistics(
+            Namespace="AWS/EC2",
+            MetricName="NetworkIn",
+            Dimensions=[{"Name": "InstanceId", "Value": instance_id}],
+            StartTime=start, EndTime=end,
+            Period=86400, Statistics=["Average"],
+        )
+        net_out = cw.get_metric_statistics(
+            Namespace="AWS/EC2",
+            MetricName="NetworkOut",
+            Dimensions=[{"Name": "InstanceId", "Value": instance_id}],
+            StartTime=start, EndTime=end,
+            Period=86400, Statistics=["Average"],
+        )
+
+        avg_in = 0
+        avg_out = 0
+        if net_in.get("Datapoints"):
+            avg_in = sum(d["Average"] for d in net_in["Datapoints"]) / len(net_in["Datapoints"])
+        if net_out.get("Datapoints"):
+            avg_out = sum(d["Average"] for d in net_out["Datapoints"]) / len(net_out["Datapoints"])
+
+        return {"network_in_bytes_avg": round(avg_in, 2), "network_out_bytes_avg": round(avg_out, 2)}
+    except ClientError:
+        return {"network_in_bytes_avg": 0, "network_out_bytes_avg": 0}
+
+
 def _scan_ec2_instances(region: str):
     resources = []
     try:

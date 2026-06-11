@@ -3,6 +3,7 @@ uvicorn
 boto3
 python-dotenv
 openai
+httpx
 psycopg2-binary
 websockets
 PyJWT

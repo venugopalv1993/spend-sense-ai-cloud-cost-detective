@@ -5,6 +5,8 @@ import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
 import Report from './pages/Report'
 import History from './pages/History'
+import Chat from './pages/Chat'
+import Simulator from './pages/Simulator'
 import Navbar from './components/Navbar'
 
 function App() {
@@ -36,6 +38,8 @@ function App() {
       <main className="container mx-auto px-4 py-6">
         <Routes>
           <Route path="/" element={<Dashboard token={token} />} />
+          <Route path="/chat" element={<Chat token={token} />} />
+          <Route path="/simulator" element={<Simulator token={token} />} />
           <Route path="/report/:id" element={<Report token={token} />} />
           <Route path="/history" element={<History token={token} />} />
           <Route path="*" element={<Navigate to="/" />} />

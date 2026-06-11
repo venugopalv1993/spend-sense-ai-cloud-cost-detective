@@ -1,6 +1,16 @@
-# AI Cloud Cost Detective (AWS)
+# CloudPulse AI — Conversational Cloud Cost Optimization Platform
 
-An AI-powered tool that investigates AWS cloud costs automatically. It scans resources across your AWS account and regions, detects cost issues like over-provisioning and misconfigurations, and provides actionable suggestions with copyable AWS CLI fix commands.
+An AI-powered cloud engagement platform that transforms AWS infrastructure metrics into actionable, personalized recommendations through a conversational UI. Instead of raw metrics, CloudPulse AI explains insights in natural language and helps technical and business users make smarter cloud decisions.
+
+## Key Features
+
+- **AI Chat Assistant** — Ask "Why is my AWS bill high?" and get specific breakdowns
+- **Cloud Efficiency Score** — Gamified 0-100 score tracking optimization progress
+- **Scale Down/Up Detection** — Identifies over-provisioned and at-risk resources
+- **Predictive Analysis** — Forecasts next month's spend and budget overrun risks
+- **One-Click Optimization Simulator** — Preview savings before making changes
+- **Role-Based Recommendations** — Tailored for DevOps, Finance, and CTO personas
+- **Executive Dashboard** — Technical and Business views with toggle
 
 ## Tech Stack
 
@@ -9,8 +19,8 @@ An AI-powered tool that investigates AWS cloud costs automatically. It scans res
 | Frontend | React 19 (Vite 8 + TypeScript + Tailwind CSS 4) |
 | Backend | Python (FastAPI + Uvicorn) |
 | Auth | Custom JWT Auth (bcrypt + PyJWT, HS256, 24h expiry) |
-| Cloud Scanning | Boto3 (AWS SDK for Python) |
-| AI Analysis | OpenAI API / Azure OpenAI / Groq (configurable) |
+| Cloud Scanning | Boto3 (AWS SDK — CloudWatch, Cost Explorer, Budgets, Trusted Advisor) |
+| AI Analysis | OpenAI API / Azure OpenAI / Groq (configurable LLM) |
 | Database | PostgreSQL (psycopg2) |
 | Live Updates | FastAPI WebSocket |
 
@@ -264,8 +274,6 @@ AWS/
 │   ├── package.json
 │   ├── vite.config.ts
 │   └── tsconfig.json
-├── Architecture.MD
-├── RequestFlow.MD
 └── README.md
 ```
 
