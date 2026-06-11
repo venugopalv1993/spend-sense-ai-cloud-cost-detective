@@ -2,7 +2,7 @@
 
 An AI-powered cloud engagement platform that transforms AWS infrastructure metrics into actionable, personalized recommendations through a conversational UI. Instead of raw metrics, CloudPulse AI explains insights in natural language and helps technical and business users make smarter cloud decisions.
 
-image.png
+![CloudPulse AI](./image.png)
 
 ## Key Features
 
