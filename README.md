@@ -4,6 +4,7 @@ An AI-powered cloud engagement platform that transforms AWS infrastructure metri
 
 ![CloudPulse AI](./image.png)
 
+
 ## Key Features
 
 - **AI Chat Assistant** — Ask "Why is my AWS bill high?" and get specific breakdowns
@@ -288,3 +289,7 @@ AWS/
 5. Resource data is sent to OpenAI API for cost analysis
 6. Analysis results are stored in PostgreSQL
 7. Final report with cost breakdown, suggestions, and fix commands (AWS CLI) is displayed
+
+## Demonstration
+
+<video src="./demo.mp4" controls width="100%"></video>
