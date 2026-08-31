@@ -292,4 +292,4 @@ AWS/
 
 ## Demonstration
 
-<video src="./demo.mp4" controls width="100%"></video>
+[![Watch the demo](./image.png)](./demo.mp4)
